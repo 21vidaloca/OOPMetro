@@ -499,8 +499,8 @@ int main() {
     double timpTotal = 0;
     vector<string> rutaCompleta;
 
-    if (retea.calculeazaRutaOptima("Pantelimon", "Pipera", timpTotal, rutaCompleta)) {
-        cout << "Ruta de la Pantelimon la Pipera:\n";
+    if (retea.calculeazaRutaOptima("Eroilor", "Pipera", timpTotal, rutaCompleta)) {
+        cout << "Ruta de la Eroilor la Pipera:\n";
         for (size_t i = 0; i < rutaCompleta.size(); i++) {
             cout << i+1 << ". " << rutaCompleta[i];
             if (i < rutaCompleta.size() - 1) {
