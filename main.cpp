@@ -263,7 +263,6 @@ public:
     void adaugaTraseu(const Traseu& traseu) {
         trasee.push_back(traseu);
     }
-
     void afisareTrasee() const {
         cout << "RETEAUA DE METROU: " << numeRetea << endl;
         cout << "Numar trasee: " << trasee.size() << endl << endl;
