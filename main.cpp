@@ -11,7 +11,7 @@ using namespace std;
 class Statia {
     string nume;
     int timpAsteptare;
-    int distantaUrmatoareStatie; // distanta pana la urmatoarea statie in km
+    int distantaUrmatoareStatie;
 
 public:
     Statia() : nume("Unknown"), timpAsteptare(0), distantaUrmatoareStatie(0) {}
@@ -51,8 +51,6 @@ public:
     const string& getNume() const { return nume; }
     int getDistantaUrmatoareStatie() const { return distantaUrmatoareStatie; }
 
-
-    // Verifica daca doua statii au acelasi nume
     bool operator==(const Statia& other) const {
         return nume == other.nume;
     }
@@ -93,14 +91,10 @@ public:
         return os;
     }
 
-
-
-    // Calculeaza timpul de parcurgere pentru o distanta data in km
     double calculeazaTimpParcurgere(double distanta) const {
         // Timpul in ore
         double timpOre = distanta / viteza;
-        // Convertim in minute
-        return timpOre * 60.0;
+        return timpOre * 60.0; // conversie
     }
 };
 
@@ -148,7 +142,6 @@ public:
     }
 
 
-    // Calculeaza distanta totala a traseului
     double calculeazaDistantaTotala() const {
         double distantaTotala = 0;
         for (size_t i = 0; i < statii.size(); i++) {
@@ -157,10 +150,10 @@ public:
         return distantaTotala;
     }
 
-    // Calculeaza timpul intre doua statii specificate
+
     bool calculeazaRutaIntreStatii(const string& start, const string& destinatie,
                                  double& timpCalatorie, vector<string>& rutaStatii) const {
-        // Gasim statiile de start si destinatie
+
         int indexStart = -1;
         int indexDestinatie = -1;
 
@@ -177,12 +170,10 @@ public:
             }
         }
 
-        // Verificam daca am gasit ambele statii
         if (indexStart == -1 || indexDestinatie == -1) {
             return false;
         }
 
-        // Determinam directia de parcurgere
         bool directie = indexStart < indexDestinatie;
         int startIdx, endIdx;
 
@@ -194,22 +185,18 @@ public:
             endIdx = indexStart;
         }
 
-        // Calculam distanta totala intre statii
         double distanta = 0;
         for (int i = startIdx; i < endIdx; i++) {
             distanta += statii[i].getDistantaUrmatoareStatie();
         }
 
-        // Calculam timpul de calatorie
         timpCalatorie = tren.calculeazaTimpParcurgere(distanta);
 
-        // Adaugam timpul de asteptare in statiile intermediare
         for (int i = startIdx; i <= endIdx; i++) {
             rutaStatii.push_back(statii[i].getNume());
 
-            // Adaugam timpul de asteptare pentru toate statiile in afara de destinatie
             if (i < endIdx) {
-                timpCalatorie += statii[i].getTimpAsteptare() / 60.0; // convertim sec in min
+                timpCalatorie += statii[i].getTimpAsteptare() / 60.0; // conversie
             }
         }
 
@@ -242,17 +229,13 @@ private:
     vector<Traseu> trasee;
     string numeRetea;
 
-    // Structuri pentru algoritmul de gasire a rutei
     struct Nod {
         string numeStatie;
-        double distanta;    // Timp total pana la acest nod
-        vector<string> ruta; // Ruta pana la acest nod
-
-        // Constructor
+        double distanta;
+        vector<string> ruta;
         Nod(const string& nume, double dist, const vector<string>& r)
             : numeStatie(nume), distanta(dist), ruta(r) {}
 
-        // Operator de comparare pentru coada de prioritati
         bool operator>(const Nod& other) const {
             return distanta > other.distanta;
         }
@@ -290,7 +273,6 @@ public:
         }
     }
 
-    // Verifica daca o statie exista in retea
     bool existaStatieInRetea(const string& numeStatie) const {
         for (const auto& traseu : trasee) {
             if (traseu.contineStatia(numeStatie)) {
@@ -300,10 +282,10 @@ public:
         return false;
     }
 
-    // Calculeaza ruta optima intre doua statii in intreaga retea
+    // Calculeaza ruta optima intre doua statii din intreaga retea
     bool calculeazaRutaOptima(const string& start, const string& destinatie,
                             double& timpTotal, vector<string>& rutaCompleta) const {
-        // Verificam daca statiile exista in retea
+
         if (!existaStatieInRetea(start) || !existaStatieInRetea(destinatie)) {
             return false;
         }
@@ -324,12 +306,8 @@ public:
         }
 
         // Cazul complex: statiile sunt pe trasee diferite
-        // Implementam un algoritm simplificat bazat pe Dijkstra
-
-        // Cream un graf cu toate statiile din retea
         unordered_map<string, vector<pair<string, double>>> graf;
 
-        // Adaugam conexiunile pentru fiecare traseu
         for (const auto& traseu : trasee) {
             const vector<Statia>& statii = traseu.getStatii();
             const Tren& tren = traseu.getTren();
@@ -348,11 +326,9 @@ public:
             }
         }
 
-        // Algoritmul Dijkstra pentru gasirea celei mai scurte rute
         unordered_map<string, double> distante;
         unordered_map<string, bool> vizitat;
 
-        // Initializam distantele cu infinit
         for (const auto& traseu : trasee) {
             const vector<Statia>& statii = traseu.getStatii();
             for (const auto& statie : statii) {
@@ -361,10 +337,8 @@ public:
             }
         }
 
-        // Distanta la statia de start este 0
         distante[start] = 0;
 
-        // Cream o coada de prioritati pentru a procesa statiile in ordine crescatoare a distantei
         priority_queue<Nod, vector<Nod>, greater<Nod>> coada;
         coada.push(Nod(start, 0, {start}));
 
@@ -374,30 +348,24 @@ public:
 
             string statieCurenta = nodCurent.numeStatie;
 
-            // Daca am ajuns la destinatie, construim ruta
             if (statieCurenta == destinatie) {
                 rutaCompleta = nodCurent.ruta;
                 timpTotal = nodCurent.distanta;
                 return true;
             }
 
-            // Daca am vizitat deja acest nod, continuam
             if (vizitat[statieCurenta]) {
                 continue;
             }
 
             vizitat[statieCurenta] = true;
 
-            // Exploram vecinii
             for (const auto& vecin : graf[statieCurenta]) {
                 string statieVecina = vecin.first;
                 double costMargine = vecin.second;
 
-                // Daca am gasit o ruta mai scurta, actualizam
                 if (distante[statieVecina] > distante[statieCurenta] + costMargine) {
                     distante[statieVecina] = distante[statieCurenta] + costMargine;
-
-                    // Cream noua ruta
                     vector<string> rutaNoua = nodCurent.ruta;
                     rutaNoua.push_back(statieVecina);
 
@@ -406,15 +374,12 @@ public:
             }
         }
 
-        // Daca ajungem aici, nu am gasit nicio ruta
         return false;
     }
 
-    // Numarul total de statii unice din retea
     int numarTotalStatii() const {
         vector<string> toateStatiile;
 
-        // Colectam toate statiile din toate traseele
         for (const auto& traseu : trasee) {
             const vector<Statia>& statiiTraseu = traseu.getStatii();
             for (const auto& statie : statiiTraseu) {
@@ -422,7 +387,6 @@ public:
             }
         }
 
-        // Sortam si eliminam duplicatele
         sort(toateStatiile.begin(), toateStatiile.end());
         auto last = unique(toateStatiile.begin(), toateStatiile.end());
         toateStatiile.erase(last, toateStatiile.end());
@@ -430,7 +394,6 @@ public:
         return toateStatiile.size();
     }
 
-    // Lungimea totala a retelei
     double lungimeTotalaRetea() const {
         double lungimeTotala = 0;
 
@@ -441,7 +404,6 @@ public:
         return lungimeTotala;
     }
 
-    // Statia cu cel mai mare timp de asteptare
     string statiaAglomerata() const {
         string numeStatie;
         int timpMaxim = -1;
@@ -463,12 +425,12 @@ public:
 int main() {
     ReteaMetrou retea("Metrou Bucuresti");
 
-    // Cream trenuri
+
     Tren tren1("M1", 80);
     Tren tren2("M2", 70);
     Tren tren3("M3", 75);
 
-    // Cream traseele
+
     Traseu traseul1(tren1, "Magistrala 1: Pantelimon - Gara de Nord");
     traseul1.adaugaStatia(Statia("Pantelimon", 20, 3));
     traseul1.adaugaStatia(Statia("Iancului", 25, 2));
@@ -497,12 +459,10 @@ int main() {
     traseul3.adaugaStatia(Statia("Dristor", 35, 4));
     traseul3.adaugaStatia(Statia("Anghel Saligny", 20, 0));
 
-    // Adaugam traseele la retea
+
     retea.adaugaTraseu(traseul1);
     retea.adaugaTraseu(traseul2);
     retea.adaugaTraseu(traseul3);
-
-    cout << "Lista traseelor de metrou:\n";
     retea.afisareTrasee();
 
     cout << "--------------------\n";
