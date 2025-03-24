@@ -350,7 +350,6 @@ public:
             for (size_t i = 0; i < statii.size(); i++) {
                 string statieActuala = statii[i].getNume();
 
-                // Adaugam conexiunile catre statiile adiacente
                 if (i > 0) {
                     string statiePrecedenta = statii[i-1].getNume();
                     double distanta = statii[i-1].getDistantaUrmatoareStatie();
