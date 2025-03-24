@@ -105,9 +105,10 @@ public:
 };
 
 class Traseu {
+    Tren tren;
     string numeRuta;
     vector<Statia> statii;
-    Tren tren;
+
 
 public:
     explicit Traseu(const Tren& tren, const string& numeRuta = "Ruta standard")
@@ -115,7 +116,7 @@ public:
 
     // Constructor de copiere
     Traseu(const Traseu& other)
-        : numeRuta(other.numeRuta), statii(other.statii), tren(other.tren) {}
+        : tren(other.tren),numeRuta(other.numeRuta), statii(other.statii) {}
 
     // Operator de atribuire
     Traseu& operator=(const Traseu& other) {
@@ -136,10 +137,6 @@ public:
         return statii;
     }
 
-    // Getter pentru nume ruta
-    const string& getNumeRuta() const {
-        return numeRuta;
-    }
 
     // Getter pentru tren
     const Tren& getTren() const {
@@ -150,19 +147,11 @@ public:
         statii.push_back(statie);
     }
 
-    // Calculeaza timpul total de asteptare in toate statiile
-    double calculeazaTimpAsteptareTotal() const {
-        double timp = 0;
-        for (const auto& s : statii) {
-            timp += s.getTimpAsteptare();
-        }
-        return timp;
-    }
 
     // Calculeaza distanta totala a traseului
     double calculeazaDistantaTotala() const {
         double distantaTotala = 0;
-        for (int i = 0; i < statii.size(); i++) {
+        for (size_t i = 0; i < statii.size(); i++) {
             distantaTotala += statii[i].getDistantaUrmatoareStatie();
         }
         return distantaTotala;
@@ -175,7 +164,7 @@ public:
         int indexStart = -1;
         int indexDestinatie = -1;
 
-        for (int i = 0; i < statii.size(); i++) {
+        for (size_t i = 0; i < statii.size(); i++) {
             if (statii[i].getNume() == start) {
                 indexStart = i;
             }
@@ -241,7 +230,7 @@ public:
         os << "Traseu: " << traseu.numeRuta << "\n";
         os << "Tren: " << traseu.tren << "\n";
         os << "Statii:\n";
-        for (int i = 0; i < traseu.statii.size(); i++) {
+        for (size_t i = 0; i < traseu.statii.size(); i++) {
             os << i+1 << ". " << traseu.statii[i] << "\n";
         }
         return os;
@@ -345,7 +334,7 @@ public:
             const vector<Statia>& statii = traseu.getStatii();
             const Tren& tren = traseu.getTren();
 
-            for (int i = 0; i < statii.size(); i++) {
+            for (size_t i = 0; i < statii.size(); i++) {
                 const string& statieActuala = statii[i].getNume();
 
                 if (i > 0) {
@@ -526,7 +515,7 @@ int main() {
 
     if (traseul1.calculeazaRutaIntreStatii("Piata Unirii", "Eroilor", timpCalatorie, rutaStatii)) {
         cout << "Ruta de la Piata Unirii la Eroilor:\n";
-        for (int i = 0; i < rutaStatii.size(); i++) {
+        for (size_t i = 0; i < rutaStatii.size(); i++) {
             cout << i+1 << ". " << rutaStatii[i];
             if (i < rutaStatii.size() - 1) {
                 cout << " -> ";
@@ -552,7 +541,7 @@ int main() {
 
     if (retea.calculeazaRutaOptima("Pantelimon", "Pipera", timpTotal, rutaCompleta)) {
         cout << "Ruta de la Pantelimon la Pipera:\n";
-        for (int i = 0; i < rutaCompleta.size(); i++) {
+        for (size_t i = 0; i < rutaCompleta.size(); i++) {
             cout << i+1 << ". " << rutaCompleta[i];
             if (i < rutaCompleta.size() - 1) {
                 cout << " -> ";
