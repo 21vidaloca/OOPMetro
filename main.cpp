@@ -51,10 +51,6 @@ public:
     const string& getNume() const { return nume; }
     int getDistantaUrmatoareStatie() const { return distantaUrmatoareStatie; }
 
-    // Setam distanta catre urmatoarea statie
-    void setDistantaUrmatoareStatie(int distanta) {
-        distantaUrmatoareStatie = distanta;
-    }
 
     // Verifica daca doua statii au acelasi nume
     bool operator==(const Statia& other) const {
@@ -97,13 +93,7 @@ public:
         return os;
     }
 
-    int getViteza() const {
-        return viteza;
-    }
 
-    const string& getId() const {
-        return id;
-    }
 
     // Calculeaza timpul de parcurgere pentru o distanta data in km
     double calculeazaTimpParcurgere(double distanta) const {
@@ -140,10 +130,6 @@ public:
     // Destructor
     ~Traseu() {}
 
-    // Getter pentru nume ruta
-    const string& getNumeRuta() const {
-        return numeRuta;
-    }
 
     // Getter pentru lista de statii
     const vector<Statia>& getStatii() const {
@@ -183,10 +169,6 @@ public:
         return tren.calculeazaTimpParcurgere(distantaTotala);
     }
 
-    // Calculeaza timpul total (calatorie + asteptare)
-    double calculeazaTimpTotal() const {
-        return calculeazaTimpParcurgereTotal() + calculeazaTimpAsteptareTotal() / 60.0; // convertim sec in min
-    }
 
     // Calculeaza timpul intre doua statii specificate
     bool calculeazaRutaIntreStatii(const string& start, const string& destinatie,
@@ -255,16 +237,6 @@ public:
             }
         }
         return false;
-    }
-
-    // Returneaza indexul unei statii in traseu
-    int getIndexStatie(const string& numeStatie) const {
-        for (size_t i = 0; i < statii.size(); i++) {
-            if (statii[i].getNume() == numeStatie) {
-                return i;
-            }
-        }
-        return -1; // Statia nu a fost gasita
     }
 
     friend ostream& operator<<(ostream& os, const Traseu& traseu) {
