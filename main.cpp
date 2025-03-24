@@ -188,9 +188,9 @@ public:
         return calculeazaTimpParcurgereTotal() + calculeazaTimpAsteptareTotal() / 60.0; // convertim sec in min
     }
 
-    // FUNCTIONALITATE NOUA: Calculeaza timpul intre doua statii specificate
+    // Calculeaza timpul intre doua statii specificate
     bool calculeazaRutaIntreStatii(const string& start, const string& destinatie,
-                                  double& timpCalatorie, vector<string>& rutaStatii) const {
+                                 double& timpCalatorie, vector<string>& rutaStatii) const {
         // Gasim statiile de start si destinatie
         int indexStart = -1;
         int indexDestinatie = -1;
@@ -283,29 +283,25 @@ private:
     vector<Traseu> trasee;
     string numeRetea;
 
-    // Functie auxiliara pentru a gasi un traseu dupa nume
-    Traseu* gasesteTraseu(const string& numeRuta) {
-        for (auto& traseu : trasee) {
-            if (traseu.getNumeRuta() == numeRuta) {
-                return &traseu;
-            }
-        }
-        return nullptr;
-    }
+    // Structuri pentru algoritmul de gasire a rutei
+    struct Nod {
+        string numeStatie;
+        double distanta;    // Timp total pana la acest nod
+        vector<string> ruta; // Ruta pana la acest nod
 
-    // Functie pentru a verifica daca o statie exista in retea
-    bool existaStatieInRetea(const string& numeStatie) const {
-        for (const auto& traseu : trasee) {
-            if (traseu.contineStatia(numeStatie)) {
-                return true;
-            }
+        // Constructor
+        Nod(const string& nume, double dist, const vector<string>& r)
+            : numeStatie(nume), distanta(dist), ruta(r) {}
+
+        // Operator de comparare pentru coada de prioritati
+        bool operator>(const Nod& other) const {
+            return distanta > other.distanta;
         }
-        return false;
-    }
+    };
 
 public:
-    // Constructor default
-    ReteaMetrou(const string& nume = "Metrou Bucuresti") : numeRetea(nume) {}
+    // Constructor explicit
+    explicit ReteaMetrou(const string& nume = "Metrou Bucuresti") : numeRetea(nume) {}
 
     // Constructor de copiere
     ReteaMetrou(const ReteaMetrou& other) : trasee(other.trasee), numeRetea(other.numeRetea) {}
@@ -335,25 +331,19 @@ public:
         }
     }
 
-    // Structuri pentru algoritmul de gasire a rutei
-    struct Nod {
-        string numeStatie;
-        double distanta;    // Timp total pana la acest nod
-        vector<string> ruta; // Ruta pana la acest nod
-
-        // Constructor
-        Nod(const string& nume, double dist, const vector<string>& r)
-            : numeStatie(nume), distanta(dist), ruta(r) {}
-
-        // Operator de comparare pentru coada de prioritati
-        bool operator>(const Nod& other) const {
-            return distanta > other.distanta;
+    // Verifica daca o statie exista in retea
+    bool existaStatieInRetea(const string& numeStatie) const {
+        for (const auto& traseu : trasee) {
+            if (traseu.contineStatia(numeStatie)) {
+                return true;
+            }
         }
-    };
+        return false;
+    }
 
-    // FUNCTIONALITATE NOUA: Calculeaza ruta optima intre doua statii in intreaga retea
+    // Calculeaza ruta optima intre doua statii in intreaga retea
     bool calculeazaRutaOptima(const string& start, const string& destinatie,
-                             double& timpTotal, vector<string>& rutaCompleta) const {
+                            double& timpTotal, vector<string>& rutaCompleta) const {
         // Verificam daca statiile exista in retea
         if (!existaStatieInRetea(start) || !existaStatieInRetea(destinatie)) {
             return false;
@@ -402,7 +392,6 @@ public:
 
         // Algoritmul Dijkstra pentru gasirea celei mai scurte rute
         unordered_map<string, double> distante;
-        unordered_map<string, string> precedent;
         unordered_map<string, bool> vizitat;
 
         // Initializam distantele cu infinit
@@ -463,7 +452,7 @@ public:
         return false;
     }
 
-    // FUNCTIONALITATE NOUA: Numarul total de statii unice din retea
+    // Numarul total de statii unice din retea
     int numarTotalStatii() const {
         vector<string> toateStatiile;
 
@@ -483,7 +472,7 @@ public:
         return toateStatiile.size();
     }
 
-    // FUNCTIONALITATE NOUA: Lungimea totala a retelei
+    // Lungimea totala a retelei
     double lungimeTotalaRetea() const {
         double lungimeTotala = 0;
 
@@ -494,7 +483,7 @@ public:
         return lungimeTotala;
     }
 
-    // FUNCTIONALITATE NOUA: Statia cu cel mai mare timp de asteptare
+    // Statia cu cel mai mare timp de asteptare
     string statiaAglomerata() const {
         string numeStatie;
         int timpMaxim = -1;
