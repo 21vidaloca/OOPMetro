@@ -5,7 +5,7 @@ using namespace std;
 
 class Statia {
     string nume;
-    int timpAsteptare; // timp mediu de așteptare în secunde
+    int timpAsteptare; 
 
 public:
     Statia() : nume("Unknown"), timpAsteptare(0) {}
@@ -29,7 +29,7 @@ public:
 class Tren {
     string id;
     int capacitate;
-    int viteza; // în km/h
+    int viteza; 
 
 public:
     Tren() : id("Unknown"), capacitate(0), viteza(0) {}
