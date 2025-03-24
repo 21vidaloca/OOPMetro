@@ -105,9 +105,10 @@ public:
 };
 
 class Traseu {
+    Tren tren;
     string numeRuta;
     vector<Statia> statii;
-    Tren tren;
+
 
 public:
     explicit Traseu(const Tren& tren, const string& numeRuta = "Ruta standard")
@@ -115,7 +116,7 @@ public:
 
     // Constructor de copiere
     Traseu(const Traseu& other)
-        : numeRuta(other.numeRuta), statii(other.statii), tren(other.tren) {}
+        : tren(other.tren),numeRuta(other.numeRuta), statii(other.statii) {}
 
     // Operator de atribuire
     Traseu& operator=(const Traseu& other) {
@@ -134,6 +135,11 @@ public:
     // Getter pentru lista de statii
     const vector<Statia>& getStatii() const {
         return statii;
+    }
+
+    // Getter pentru nume ruta
+    const string& getNumeRuta() const {
+        return numeRuta;
     }
 
     // Getter pentru tren
@@ -162,13 +168,6 @@ public:
         }
         return distantaTotala;
     }
-
-    // Calculeaza timpul total de parcurgere a traseului (fara opriri)
-    double calculeazaTimpParcurgereTotal() const {
-        double distantaTotala = calculeazaDistantaTotala();
-        return tren.calculeazaTimpParcurgere(distantaTotala);
-    }
-
 
     // Calculeaza timpul intre doua statii specificate
     bool calculeazaRutaIntreStatii(const string& start, const string& destinatie,
@@ -348,7 +347,7 @@ public:
             const Tren& tren = traseu.getTren();
 
             for (size_t i = 0; i < statii.size(); i++) {
-                string statieActuala = statii[i].getNume();
+                const string& statieActuala = statii[i].getNume();
 
                 if (i > 0) {
                     string statiePrecedenta = statii[i-1].getNume();
