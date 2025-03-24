@@ -137,10 +137,6 @@ public:
         return statii;
     }
 
-    // Getter pentru nume ruta
-    const string& getNumeRuta() const {
-        return numeRuta;
-    }
 
     // Getter pentru tren
     const Tren& getTren() const {
@@ -151,14 +147,6 @@ public:
         statii.push_back(statie);
     }
 
-    // Calculeaza timpul total de asteptare in toate statiile
-    double calculeazaTimpAsteptareTotal() const {
-        double timp = 0;
-        for (const auto& s : statii) {
-            timp += s.getTimpAsteptare();
-        }
-        return timp;
-    }
 
     // Calculeaza distanta totala a traseului
     double calculeazaDistantaTotala() const {
