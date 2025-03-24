@@ -37,8 +37,7 @@ public:
     Tren(const string& id, int capacitate, int viteza) : id(id), capacitate(capacitate), viteza(viteza) {}
 
     friend ostream& operator<<(ostream& os, const Tren& tren) {
-        os << "Tren ID: " << tren.id << " | Capacitate: " << tren.capacitate
-           << " | Viteza: " << tren.viteza << " km/h";
+        os << "Tren ID: " << tren.id << " | Capacitate: " << tren.capacitate << " | Viteza: " << tren.viteza << " km/h";
         return os;
     }
 
@@ -55,9 +54,9 @@ public:
     explicit Traseu(const Tren& tren) : tren(tren) {}
 
     // Constructor de copiere corect
-    Traseu(const Traseu& other) : statii(other.statii),tren(other.tren)  {}//
+    Traseu(const Traseu& other) : statii(other.statii),tren(other.tren)  {}
 
-    // Operator= corect
+    
     Traseu& operator=(const Traseu& other) {
         if (this != &other) {
             tren = other.tren;
