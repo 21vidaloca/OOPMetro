@@ -505,7 +505,6 @@ int main() {
     cout << "Lista traseelor de metrou:\n";
     retea.afisareTrasee();
 
-    cout << "\nFUNCTIONALITATI NOI:\n";
     cout << "--------------------\n";
 
     // 1. Calcularea timpului total intre doua statii
@@ -522,14 +521,16 @@ int main() {
             }
             if ((i + 1) % 3 == 0) cout << "\n";
         }
-        if (rutaStatii.size() % 3 != 0) cout << "\n";
+        if (rutaStatii.size() % 3 != 0)
+            cout << "\n";
         cout << "Timp total estimat: " << timpCalatorie << " minute\n";
     } else {
         cout << "Nu s-a putut calcula ruta intre aceste statii.\n";
     }
 
     // 2. Numarul total de statii din retea
-    cout << "\n2. Informatii despre retea:\n";
+    cout << "\n";
+    cout << "2. Informatii despre retea:\n";
     cout << "Numar total de statii: " << retea.numarTotalStatii() << endl;
     cout << "Lungimea totala a retelei: " << retea.lungimeTotalaRetea() << " km" << endl;
     cout << "Statia cu cel mai mare timp de asteptare: " << retea.statiaAglomerata() << endl;
@@ -546,11 +547,14 @@ int main() {
             if (i < rutaCompleta.size() - 1) {
                 cout << " -> ";
             }
-            if ((i + 1) % 3 == 0) cout << "\n";
+            if ((i + 1) % 3 == 0)
+                cout << "\n";
         }
-        if (rutaCompleta.size() % 3 != 0) cout << "\n";
+        if (rutaCompleta.size() % 3 != 0)
+            cout << "\n";
         cout << "Timp total estimat: " << timpTotal << " minute\n";
-    } else {
+    }
+    else {
         cout << "Nu s-a putut calcula ruta intre aceste statii.\n";
     }
 
