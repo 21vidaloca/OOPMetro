@@ -242,7 +242,7 @@ private:
     };
 
 public:
-    // Constructor explicit
+    // Constructor
     explicit ReteaMetrou(const string& nume = "Metrou Bucuresti") : numeRetea(nume) {}
 
     // Constructor de copiere
@@ -264,8 +264,8 @@ public:
         trasee.push_back(traseu);
     }
     void afisareTrasee() const {
-        cout << "RETEAUA DE METROU: " << numeRetea << endl;
-        cout << "Numar trasee: " << trasee.size() << endl << endl;
+        cout << "RETEAUA DE METROU: " << numeRetea << "\n";
+        cout << "Numar trasee: " << trasee.size() << "\n\n";
 
         for (const auto& traseu : trasee) {
             cout << traseu << "\n";
@@ -471,8 +471,8 @@ int main() {
     double timpCalatorie = 0;
     vector<string> rutaStatii;
 
-    if (traseul1.calculeazaRutaIntreStatii("Piata Unirii", "Eroilor", timpCalatorie, rutaStatii)) {
-        cout << "Ruta de la Piata Unirii la Eroilor:\n";
+    if (traseul2.calculeazaRutaIntreStatii("Piata Unirii", "Piata Victoriei", timpCalatorie, rutaStatii)) {
+        cout << "Ruta de la Piata Unirii la Victoriei:\n";
         for (size_t i = 0; i < rutaStatii.size(); i++) {
             cout << i+1 << ". " << rutaStatii[i];
             if (i < rutaStatii.size() - 1) {
@@ -490,17 +490,17 @@ int main() {
     // 2. Numarul total de statii din retea
     cout << "\n";
     cout << "2. Informatii despre retea:\n";
-    cout << "Numar total de statii: " << retea.numarTotalStatii() << endl;
-    cout << "Lungimea totala a retelei: " << retea.lungimeTotalaRetea() << " km" << endl;
-    cout << "Statia cu cel mai mare timp de asteptare: " << retea.statiaAglomerata() << endl;
+    cout << "Numar total de statii: " << retea.numarTotalStatii() << "\n";
+    cout << "Lungimea totala a retelei: " << retea.lungimeTotalaRetea() << " km \n";
+    cout << "Statia cu cel mai mare timp de asteptare: " << retea.statiaAglomerata() << "\n";
 
-    // 3. Calculare ruta intre doua statii (posibil din trasee diferite)
+    // 3. Calculare ruta intre doua statii
     cout << "\n3. Calculare ruta intre doua statii din trasee diferite:\n";
     double timpTotal = 0;
     vector<string> rutaCompleta;
 
-    if (retea.calculeazaRutaOptima("Eroilor", "Pipera", timpTotal, rutaCompleta)) {
-        cout << "Ruta de la Eroilor la Pipera:\n";
+    if (retea.calculeazaRutaOptima("Pantelimon", "Pipera", timpTotal, rutaCompleta)) {
+        cout << "Ruta de la Pantelimon la Pipera:\n";
         for (size_t i = 0; i < rutaCompleta.size(); i++) {
             cout << i+1 << ". " << rutaCompleta[i];
             if (i < rutaCompleta.size() - 1) {
@@ -516,6 +516,5 @@ int main() {
     else {
         cout << "Nu s-a putut calcula ruta intre aceste statii.\n";
     }
-
     return 0;
 }
