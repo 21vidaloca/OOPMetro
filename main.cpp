@@ -683,18 +683,18 @@ public:
             auto tren = traseu->getTren();
             cout << "\nTrenul de pe traseul " << traseu->getNumeRuta() << ":\n";
 
-            if (TrenElectric* trenElectric = dynamic_cast<TrenElectric*>(tren.get())) {
+            if (const TrenElectric* trenElectric = dynamic_cast<const TrenElectric*>(tren.get())) {
                 cout << "  - Tip: Electric\n";
                 cout << "  - Eficienta energetica: " << trenElectric->getEficientaEnergetica() << "%\n";
                 cout << "  - Autonomie baterie: " << trenElectric->getAutonomieBaterie() << " minute\n";
                 cout << "  - Mod Eco: " << (trenElectric->getModEco() ? "Activat" : "Dezactivat") << "\n";
             }
-            else if (TrenRapid* trenRapid = dynamic_cast<TrenRapid*>(tren.get())) {
+            else if (const TrenRapid* trenRapid = dynamic_cast<const TrenRapid*>(tren.get())) {
                 cout << "  - Tip: Rapid\n";
                 cout << "  - Acceleratie: " << trenRapid->getAcceleratie() << "\n";
                 cout << "  - Oprire selectiva: " << (trenRapid->getOprireStatiiSelectate() ? "Da" : "Nu") << "\n";
             }
-            else if (TrenNoapte* trenNoapte = dynamic_cast<TrenNoapte*>(tren.get())) {
+            else if (const TrenNoapte* trenNoapte = dynamic_cast<const TrenNoapte*>(tren.get())) {
                 cout << "  - Tip: Nocturn\n";
                 cout << "  - Program: " << trenNoapte->getOraStart() << ":00 - "
                      << trenNoapte->getOraStop() << ":00\n";
