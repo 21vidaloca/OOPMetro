@@ -107,7 +107,7 @@ public:
     }
 
     // Getteri
-    const string& getId() const { return id; }
+    // const string& getId() const { return id; }
     int getViteza() const { return viteza; }
 
     // Operator pentru afisare
@@ -170,14 +170,6 @@ public:
         return timpOre * 60.0; // conversie la minute
     }
 
-    bool trebuieOprireLaStatia(const string& numeStatie) const {
-        if (!oprireStatiiSelectate) return true;
-
-        for (const auto& statie : statiiDeOprire) {
-            if (statie == numeStatie) return true;
-        }
-        return false;
-    }
 
     // Getteri specifici
     int getAcceleratie() const { return acceleratie; }
@@ -203,26 +195,8 @@ public:
 
     double calculeazaTimpParcurgere(double distanta) const override {
         // In timpul noptii, viteza este redusa conform factorului
-        time_t now = time(nullptr);
-        tm* localTime = localtime(&now);
-        int oraCurenta = localTime->tm_hour;
-
-        bool esteInInterval = false;
-        if (oraStart < oraStop) {
-            // Interval normal (ex: 22:00 - 6:00)
-            esteInInterval = (oraCurenta >= oraStart && oraCurenta < oraStop);
-        } else {
-            // Interval peste miezul noptii (ex: 22:00 - 6:00)
-            esteInInterval = (oraCurenta >= oraStart || oraCurenta < oraStop);
-        }
-
-        if (esteInInterval) {
-            double timpOre = distanta / (getViteza() * factorViteza);
-            return timpOre * 60.0;
-        } else {
-            // Timpul standard in afara programului de noapte
-            return Tren::calculeazaTimpParcurgere(distanta);
-        }
+        double timpOre = distanta / (getViteza() * factorViteza);
+        return timpOre * 60.0;
     }
 
     double calculeazaEficienta() const override {
@@ -235,14 +209,6 @@ public:
         double eficientaProgram = 0.9; // 90% eficienta datorita programului de noapte
 
         return eficientaViteza * eficientaProgram;
-    }
-
-    bool esteInProgram(int ora) const {
-        if (oraStart < oraStop) {
-            return ora >= oraStart && ora < oraStop;
-        } else {
-            return ora >= oraStart || ora < oraStop;
-        }
     }
 
     // Getteri specifici
@@ -283,21 +249,6 @@ public:
         return timpOre * 60.0;
     }
 
-    double calculeazaConsumEnergie(double distanta) const {
-        // Consum de baza in kWh/km
-        double consumBaza = 15.0;
-
-        // Aplicare eficienta
-        double consumReal = consumBaza * (1.0 - eficientaEnergetica / 100.0);
-
-        // In modul eco, consumul scade
-        if (modEco) {
-            consumReal *= 0.7; // reducere cu 30%
-        }
-
-        return consumReal * distanta;
-    }
-
     double calculeazaEficienta() const override {
         // Pentru trenul electric, eficienta este determinata de eficienta energetica
         // si de faptul ca este sau nu in modul eco
@@ -305,15 +256,6 @@ public:
         return eficientaEnergetica * eficientaModificare / 100.0;
     }
 
-    void setModEco(bool eco) {
-        modEco = eco;
-    }
-
-    double getAutonomieRamasaKm(double consumMediuPeKm) const {
-        // Calculeaza cati km mai poate parcurge cu bateria actuala
-        double energieDisponibila = autonomieBaterie * consumMediuPeKm / 60.0;
-        return energieDisponibila / (modEco ? consumMediuPeKm * 0.7 : consumMediuPeKm);
-    }
 
     // Getteri specifici
     double getEficientaEnergetica() const { return eficientaEnergetica; }
@@ -741,18 +683,18 @@ public:
             auto tren = traseu->getTren();
             cout << "\nTrenul de pe traseul " << traseu->getNumeRuta() << ":\n";
 
-            if (auto trenElectric = dynamic_cast<TrenElectric*>(tren.get())) {
+            if (TrenElectric* trenElectric = dynamic_cast<TrenElectric*>(tren.get())) {
                 cout << "  - Tip: Electric\n";
                 cout << "  - Eficienta energetica: " << trenElectric->getEficientaEnergetica() << "%\n";
                 cout << "  - Autonomie baterie: " << trenElectric->getAutonomieBaterie() << " minute\n";
                 cout << "  - Mod Eco: " << (trenElectric->getModEco() ? "Activat" : "Dezactivat") << "\n";
             }
-            else if (auto trenRapid = dynamic_cast<TrenRapid*>(tren.get())) {
+            else if (TrenRapid* trenRapid = dynamic_cast<TrenRapid*>(tren.get())) {
                 cout << "  - Tip: Rapid\n";
                 cout << "  - Acceleratie: " << trenRapid->getAcceleratie() << "\n";
                 cout << "  - Oprire selectiva: " << (trenRapid->getOprireStatiiSelectate() ? "Da" : "Nu") << "\n";
             }
-            else if (auto trenNoapte = dynamic_cast<TrenNoapte*>(tren.get())) {
+            else if (TrenNoapte* trenNoapte = dynamic_cast<TrenNoapte*>(tren.get())) {
                 cout << "  - Tip: Nocturn\n";
                 cout << "  - Program: " << trenNoapte->getOraStart() << ":00 - "
                      << trenNoapte->getOraStop() << ":00\n";
@@ -771,7 +713,7 @@ int main() {
     // auto trenTemp = make_shared<Tren>("Temp", 0);
     // Creare trenuri folosind smart pointers - obiecte derivate din clasa Tren
     auto tren1 = make_shared<TrenRapid>("M1-R", 80, 25, true);
-    auto tren2 = make_shared<TrenNoapte>("M2-N", 70, 22, 6, 0.8);
+    auto tren2 = make_shared<TrenNoapte>("M2-N", 70, 23, 5, 0.8);
     auto tren3 = make_shared<TrenElectric>("M3-E", 75, 90, 480, true);
 
     // Creare trasee folosind smart pointers
