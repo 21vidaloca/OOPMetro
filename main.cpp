@@ -387,8 +387,7 @@ public:
         return distantaTotala;
     }
 
-    bool calculeazaRutaIntreStatii(const string& start, const string& destinatie,
-                                  double& timpCalatorie, vector<string>& rutaStatii) const {
+    bool calculeazaRutaIntreStatii(const string& start, const string& destinatie, double& timpCalatorie, vector<string>& rutaStatii, const shared_ptr<Tren>& trenDisponibil) const {
         int indexStart = -1;
         int indexDestinatie = -1;
 
@@ -426,7 +425,7 @@ public:
             distanta += statii[i]->getDistantaUrmatoareStatie();
         }
 
-        timpCalatorie = tren->calculeazaTimpParcurgere(distanta);
+        timpCalatorie = trenDisponibil->calculeazaTimpParcurgere(distanta);
 
         for (int i = startIdx; i <= endIdx; i++) {
             rutaStatii.push_back(statii[i]->getNume());
@@ -473,7 +472,6 @@ private:
     string numeRetea;
 
     // Membrii statici
-    static int numarRetele;
     static const int MAX_TRASEE = 10;
 
     struct Nod {
@@ -491,14 +489,10 @@ private:
 
 public:
     // Constructor
-    explicit ReteaMetrou(const string& nume = "Metrou Bucuresti") : numeRetea(nume) {
-        numarRetele++;
-    }
+    explicit ReteaMetrou(const string& nume = "Metrou Bucuresti") : numeRetea(nume) {}
 
     // Destructor virtual
-    virtual ~ReteaMetrou() {
-        numarRetele--;
-    }
+    virtual ~ReteaMetrou() {}
 
     // Constructor de copiere
     ReteaMetrou(const ReteaMetrou& other) : numeRetea(other.numeRetea) {
@@ -506,7 +500,6 @@ public:
         for (const auto& traseu : other.trasee) {
             trasee.push_back(make_shared<Traseu>(*traseu));
         }
-        numarRetele++;
     }
 
     // Operator de atribuire
@@ -549,13 +542,26 @@ public:
         }
         return false;
     }
-
-    bool calculeazaRutaOptima(const string& start, const string& destinatie,
-                            double& timpTotal, vector<string>& rutaCompleta) const {
+    shared_ptr<Tren> obtineTrenDisponibil(int ora) const {
+        // Selectăm tipul de tren în funcție de ora din zi
+        if (ora >= 5 && ora < 13) {
+            return make_shared<TrenRapid>("Tren-Rapid", 80, 25, true); // 05:00-13:00
+        }
+        else if (ora >= 13 && ora < 23) {
+            return make_shared<TrenElectric>("Tren-Electric", 75, 90, 480, true); // 13:00-23:00
+        }
+        else {
+            return make_shared<TrenNoapte>("Tren-Noapte", 70, 23, 5, 0.8); // 23:00-05:00
+        }
+    }
+    bool calculeazaRutaOptima(const string& start, const string& destinatie, double& timpTotal, vector<string>& rutaCompleta, int ora) const {
         if (!existaStatieInRetea(start) || !existaStatieInRetea(destinatie)) {
             cout << "Eroare: Una dintre statii nu exista in retea." << endl;
             return false;
         }
+
+        // Obținem trenul disponibil la ora specificată
+        shared_ptr<Tren> trenDisponibil = obtineTrenDisponibil(ora);
 
         // Cazul simplu: ambele statii sunt pe acelasi traseu
         for (const auto& traseu : trasee) {
@@ -563,7 +569,9 @@ public:
                 vector<string> rutaStatii;
                 double timp = 0;
 
-                bool success = traseu->calculeazaRutaIntreStatii(start, destinatie, timp, rutaStatii);
+                // Calculăm ruta folosind trenul disponibil (nu trenul traseu->getTren())
+                // Ar trebui să modificăm funcția calculeazaRutaIntreStatii pentru a accepta un parametru tren
+                bool success = traseu->calculeazaRutaIntreStatii(start, destinatie, timp, rutaStatii, trenDisponibil);
                 if (success) {
                     rutaCompleta = rutaStatii;
                     timpTotal = timp;
@@ -573,11 +581,11 @@ public:
         }
 
         // Cazul complex: statiile sunt pe trasee diferite
+        // Construim graful cu trenul disponibil
         unordered_map<string, vector<pair<string, double>>> graf;
 
         for (const auto& traseu : trasee) {
             const vector<shared_ptr<Statia>>& statii = traseu->getStatii();
-            shared_ptr<Tren> tren = traseu->getTren();
 
             for (size_t i = 0; i < statii.size(); i++) {
                 const string& statieActuala = statii[i]->getNume();
@@ -585,12 +593,18 @@ public:
                 if (i > 0) {
                     string statiePrecedenta = statii[i-1]->getNume();
                     double distanta = statii[i-1]->getDistantaUrmatoareStatie();
-                    double timp = tren->calculeazaTimpParcurgere(distanta) + statii[i-1]->getTimpAsteptare() / 60.0;
+                    double timp = trenDisponibil->calculeazaTimpParcurgere(distanta) + statii[i-1]->getTimpAsteptare() / 60.0;
 
                     graf[statieActuala].push_back({statiePrecedenta, timp});
                     graf[statiePrecedenta].push_back({statieActuala, timp});
                 }
             }
+        }
+
+        // Dacă graful este gol, înseamnă că nu există trenuri disponibile la ora specificată
+        if (graf.empty()) {
+            cout << "Eroare: Nu există trenuri disponibile la ora " << ora << endl;
+            return false;
         }
 
         unordered_map<string, double> distante;
@@ -641,7 +655,7 @@ public:
             }
         }
 
-        cout << "Eroare: Nu s-a putut calcula o ruta intre " << start << " si " << destinatie << endl;
+        cout << "Eroare: Nu s-a putut calcula o ruta intre " << start << " si " << destinatie << " la ora " << ora << endl;
         return false;
     }
 
@@ -688,47 +702,73 @@ public:
 
         return numeStatie;
     }
+    void afisareStatisticiTrenuri() const {
+        cout << "\nStatistici trenuri din reteaua " << numeRetea << ":\n";
 
-    // Functie statica
-    static int getNumarRetele() {
-        return numarRetele;
+        int nrTrenRapid = 0, nrTrenNoapte = 0, nrTrenElectric = 0;
+        double eficientaMedieTrenuri = 0.0;
+
+        for (const auto& traseu : trasee) {
+            auto tren = traseu->getTren();
+
+            // Adăugăm la eficiența medie
+            eficientaMedieTrenuri += tren->calculeazaEficienta();
+
+            // Numărăm tipul de trenuri
+            if (dynamic_cast<TrenRapid*>(tren.get())) {
+                nrTrenRapid++;
+            }
+            else if (dynamic_cast<TrenNoapte*>(tren.get())) {
+                nrTrenNoapte++;
+            }
+            else if (dynamic_cast<TrenElectric*>(tren.get())) {
+                nrTrenElectric++;
+            }
+        }
+
+        if (!trasee.empty()) {
+            eficientaMedieTrenuri /= trasee.size();
+        }
+
+        cout << "Total trenuri: " << trasee.size() << "\n";
+        cout << "- Trenuri Rapide: " << nrTrenRapid << "\n";
+        cout << "- Trenuri de Noapte: " << nrTrenNoapte << "\n";
+        cout << "- Trenuri Electrice: " << nrTrenElectric << "\n";
+        cout << "Eficienta medie a trenurilor: " << eficientaMedieTrenuri << "\n";
+
+        // Afișăm detalii specifice pentru fiecare tip de tren
+        for (const auto& traseu : trasee) {
+            auto tren = traseu->getTren();
+            cout << "\nTrenul de pe traseul " << traseu->getNumeRuta() << ":\n";
+
+            if (auto trenElectric = dynamic_cast<TrenElectric*>(tren.get())) {
+                cout << "  - Tip: Electric\n";
+                cout << "  - Eficienta energetica: " << trenElectric->getEficientaEnergetica() << "%\n";
+                cout << "  - Autonomie baterie: " << trenElectric->getAutonomieBaterie() << " minute\n";
+                cout << "  - Mod Eco: " << (trenElectric->getModEco() ? "Activat" : "Dezactivat") << "\n";
+            }
+            else if (auto trenRapid = dynamic_cast<TrenRapid*>(tren.get())) {
+                cout << "  - Tip: Rapid\n";
+                cout << "  - Acceleratie: " << trenRapid->getAcceleratie() << "\n";
+                cout << "  - Oprire selectiva: " << (trenRapid->getOprireStatiiSelectate() ? "Da" : "Nu") << "\n";
+            }
+            else if (auto trenNoapte = dynamic_cast<TrenNoapte*>(tren.get())) {
+                cout << "  - Tip: Nocturn\n";
+                cout << "  - Program: " << trenNoapte->getOraStart() << ":00 - "
+                     << trenNoapte->getOraStop() << ":00\n";
+                cout << "  - Factor viteza: " << trenNoapte->getFactorViteza() << "\n";
+            }
+            else {
+                cout << "  - Tip: Necunoscut\n";
+            }
+        }
     }
-
-    // Getter pentru nume
-    const string& getNumeRetea() const {
-        return numeRetea;
-    }
-};
-
-// Initializare membri statici
-int ReteaMetrou::numarRetele = 0;
-
-// Clasa derivata pentru retele metropolitane
-class ReteaMetrouExtinsa : public ReteaMetrou {
-private:
-    int numarLiniiRapide;
-    double lungimeZonaMetropolitana;
-
-public:
-    ReteaMetrouExtinsa(const string& nume, int numarLiniiRapide, double lungimeZonaMetropolitana)
-        : ReteaMetrou(nume), numarLiniiRapide(numarLiniiRapide), lungimeZonaMetropolitana(lungimeZonaMetropolitana) {}
-
-    void afisareTrasee() const override {
-        ReteaMetrou::afisareTrasee();
-        cout << "Informatii suplimentare pentru reteaua extinsa:\n";
-        cout << "Numar linii rapide: " << numarLiniiRapide << "\n";
-        cout << "Lungime zona metropolitana: " << lungimeZonaMetropolitana << " km\n";
-    }
-
-    // Getteri
-    int getNumarLiniiRapide() const { return numarLiniiRapide; }
-    double getLungimeZonaMetropolitana() const { return lungimeZonaMetropolitana; }
 };
 
 int main() {
     // Creare retea de metrou
     ReteaMetrou retea("Metrou Bucuresti");
-
+    // auto trenTemp = make_shared<Tren>("Temp", 0);
     // Creare trenuri folosind smart pointers - obiecte derivate din clasa Tren
     auto tren1 = make_shared<TrenRapid>("M1-R", 80, 25, true);
     auto tren2 = make_shared<TrenNoapte>("M2-N", 70, 22, 6, 0.8);
@@ -769,31 +809,14 @@ int main() {
     retea.adaugaTraseu(traseul2);
     retea.adaugaTraseu(traseul3);
 
-    cout << "Numar de retele de metrou active: " << ReteaMetrou::getNumarRetele() << "\n\n";
-
     retea.afisareTrasee();
 
     cout << "--------------------\n";
 
-    // 1. Calcularea timpului total intre doua statii
-    cout << "\n1. Calculare timp intre doua statii:\n";
-    double timpCalatorie = 0;
-    vector<string> rutaStatii;
+    cout << "Afisare Finala: \n";
+    retea.afisareStatisticiTrenuri();
 
-    if (traseul2->calculeazaRutaIntreStatii("Piata Unirii", "Piata Victoriei", timpCalatorie, rutaStatii)) {
-        cout << "Ruta de la Piata Unirii la Victoriei:\n";
-        for (size_t i = 0; i < rutaStatii.size(); i++) {
-            cout << i+1 << ". " << rutaStatii[i];
-            if (i < rutaStatii.size() - 1) {
-                cout << " -> ";
-            }
-            if ((i + 1) % 3 == 0) cout << "\n";
-        }
-        if (rutaStatii.size() % 3 != 0)
-            cout << "\n";
-        cout << "Timp total estimat: " << timpCalatorie << " minute\n";
-    }
-
+    cout << "--------------------\n";
     // 2. Informatii despre retea
     cout << "\n";
     cout << "2. Informatii despre retea:\n";
@@ -802,119 +825,68 @@ int main() {
     cout << "Statia cu cel mai mare timp de asteptare: " << retea.statiaAglomerata() << "\n";
 
     // 3. Calculare ruta intre doua statii
+
     cout << "\n3. Calculare ruta intre doua statii din trasee diferite:\n";
-    double timpTotal = 0;
-    vector<string> rutaCompleta;
+    // Test pentru diferite ore ale zilei
+    cout << "PROGRAMUL DE CIRCULATIE A TRENURILOR:\n";
+    cout << "- Trenurile Rapide circula intre orele 05:00 - 13:00\n";
+    cout << "- Trenurile Electrice circula intre orele 13:00 - 23:00\n";
+    cout << "- Trenurile de Noapte circula intre orele 23:00 - 05:00\n\n";
 
-    if (retea.calculeazaRutaOptima("Pantelimon", "Pipera", timpTotal, rutaCompleta)) {
-        cout << "Ruta de la Pantelimon la Pipera:\n";
-        for (size_t i = 0; i < rutaCompleta.size(); i++) {
-            cout << i+1 << ". " << rutaCompleta[i];
-            if (i < rutaCompleta.size() - 1) {
-                cout << " -> ";
-            }
-            if ((i + 1) % 3 == 0)
-                cout << "\n";
+    // Testarea disponibilității trenurilor în funcție de oră
+    vector<int> oreTest = {3, 8, 15, 23};
+
+    cout << "Tipul de tren disponibil la diferite ore:\n";
+    for (int ora : oreTest) {
+        cout << "Ora " << ora << ":00 - ";
+        if (ora >= 5 && ora < 13) {
+            cout << "Trenul Rapid este disponibil pe toate magistralele";
+        } else if (ora >= 13 && ora < 23) {
+            cout << "Trenul Electric este disponibil pe toate magistralele";
+        } else {
+            cout << "Trenul de Noapte este disponibil pe toate magistralele";
         }
-        if (rutaCompleta.size() % 3 != 0)
-            cout << "\n";
-        cout << "Timp total estimat: " << timpTotal << " minute\n";
+        cout << endl;
     }
 
-    // 4. Test pentru ReteaMetrouExtinsa
-    cout << "\n4. Test pentru reteaua extinsa:\n";
-    ReteaMetrouExtinsa reteaExtinsa("Metrou Bucuresti Extins", 2, 75.5);
-    reteaExtinsa.adaugaTraseu(traseul1);
-    reteaExtinsa.adaugaTraseu(traseul2);
-    reteaExtinsa.afisareTrasee();
-
-    // 5. Test pentru dynamic_cast
-    cout << "\n5. Test pentru dynamic_cast:\n";
-    ReteaMetrou* ptrRetea = &reteaExtinsa; // upcast
-    ReteaMetrouExtinsa* ptrReteaExtinsa = dynamic_cast<ReteaMetrouExtinsa*>(ptrRetea); // downcast
-
-    if (ptrReteaExtinsa) {
-        cout << "Dynamic cast realizat cu succes!\n";
-        ptrReteaExtinsa->afisareTrasee();
-    } else {
-        cout << "Dynamic cast a esuat!\n";
-    }
-
-    // 6. Test pentru erori
-    cout << "\n6. Test pentru tratarea erorilor:\n";
-    cout << "Incercare de calculare a unei rute cu o statie inexistenta...\n";
-    if (!retea.calculeazaRutaOptima("Pantelimon", "StatieInexistenta", timpTotal, rutaCompleta)) {
-        cout << "Operatiunea nu a putut fi efectuata.\n";
-    }
-
-    // 7. Test pentru clasele derivate din Tren
-    cout << "\n7. Test pentru clasele derivate din Tren:\n";
-
-    // Test TrenRapid
-    auto trenRapid = make_shared<TrenRapid>("TR101", 120, 30,
-                                         vector<string>{"Piata Unirii", "Eroilor", "Gara de Nord"});
-    cout << "Informatii tren rapid:\n";
-    trenRapid->afisare();
-    cout << "\n";
-
-    double distantaTest = 10.0; // 10 km
-    cout << "Timp parcurgere pentru " << distantaTest << " km: "
-         << trenRapid->calculeazaTimpParcurgere(distantaTest) << " minute\n";
-    cout << "Oprire la Piata Unirii: "
-         << (trenRapid->trebuieOprireLaStatia("Piata Unirii") ? "Da" : "Nu") << "\n";
-    cout << "Oprire la Pipera: "
-         << (trenRapid->trebuieOprireLaStatia("Pipera") ? "Da" : "Nu") << "\n";
-    cout << "Eficienta trenului rapid: " << trenRapid->calculeazaEficienta() << "\n";
-
-    // Test TrenNoapte
-    auto trenNoapte = make_shared<TrenNoapte>("TN202", 60, 22, 5, 0.7);
-    cout << "\nInformatii tren de noapte:\n";
-    trenNoapte->afisare();
-    cout << "\n";
-
-    int oraCurenta = 23; // Exemplu de ora
-    cout << "Tren operational la ora " << oraCurenta << ": "
-         << (trenNoapte->esteInProgram(oraCurenta) ? "Da" : "Nu") << "\n";
-    cout << "Timp parcurgere pentru " << distantaTest << " km (simulare ora 23): "
-         << trenNoapte->calculeazaTimpParcurgere(distantaTest) << " minute\n";
-    cout << "Eficienta trenului de noapte: " << trenNoapte->calculeazaEficienta() << "\n";
-
-    // Test TrenElectric
-    auto trenElectric = make_shared<TrenElectric>("TE303", 85, 92, 560, true);
-    cout << "\nInformatii tren electric:\n";
-    trenElectric->afisare();
-    cout << "\n";
-
-    cout << "Timp parcurgere pentru " << distantaTest << " km (mod eco): "
-         << trenElectric->calculeazaTimpParcurgere(distantaTest) << " minute\n";
-
-    double consumEnergetic = trenElectric->calculeazaConsumEnergie(distantaTest);
-    cout << "Consum energetic pentru " << distantaTest << " km: "
-         << consumEnergetic << " kWh\n";
-
-    trenElectric->setModEco(false);
-    cout << "Timp parcurgere pentru " << distantaTest << " km (mod normal): "
-         << trenElectric->calculeazaTimpParcurgere(distantaTest) << " minute\n";
-
-    double consumMediuPeKm = 2.5; // kWh/km
-    cout << "Autonomie ramasa: "
-         << trenElectric->getAutonomieRamasaKm(consumMediuPeKm) << " km\n";
-    cout << "Eficienta trenului electric: " << trenElectric->calculeazaEficienta() << "\n";
-
-    // 8. Test polimorfism prin pointer la clasa de baza
-    cout << "\n8. Test polimorfism prin pointer la clasa de baza Tren:\n";
-    vector<shared_ptr<Tren>> trenuriDiverse = {
-        trenRapid, trenNoapte, trenElectric
+    // Test pentru calcularea rutelor în funcție de oră
+    vector<pair<string, string>> perechiTest = {
+        {"Pantelimon", "Pipera"},
+        {"Preciziei", "Berceni"},
+        {"Gara de Nord", "Dristor"}
     };
 
-    for (const auto& t : trenuriDiverse) {
-        cout << "\nAfisare polimorfica: ";
-        t->afisare();
-        cout << "\nTimp parcurgere polimorfic pentru " << distantaTest << " km: "
-             << t->calculeazaTimpParcurgere(distantaTest) << " minute";
-        cout << "\nEficienta polimorfica: " << t->calculeazaEficienta();
-        cout << "\n";
+    cout << "\nTestarea calcularii rutei optime pentru diferite ore ale zilei:\n";
+    for (int ora : oreTest) {
+        cout << "\n======================================\n";
+        cout << "Ora curenta: " << ora << ":00\n";
+
+        for (const auto& pereche : perechiTest) {
+            const string& start = pereche.first;
+            const string& destinatie = pereche.second;
+
+            cout << "\nCalculare ruta de la " << start << " la " << destinatie << ":\n";
+
+            double timpTotal = 0;
+            vector<string> rutaCompleta;
+
+            if (retea.calculeazaRutaOptima(start, destinatie, timpTotal, rutaCompleta, ora)) {
+                cout << "Ruta gasita:\n";
+                for (size_t i = 0; i < rutaCompleta.size(); i++) {
+                    cout << rutaCompleta[i];
+                    if (i < rutaCompleta.size() - 1) {
+                        cout << " -> ";
+                    }
+                }
+                cout << "\nTimp total estimat: " << timpTotal << " minute\n";
+            } else {
+                cout << "Nu s-a putut gasi o ruta disponibila la aceasta ora.\n";
+            }
+        }
     }
+    cout << "Afisare Finala: \n";
+    retea.afisareStatisticiTrenuri();
+
 
     return 0;
 }
