@@ -15,7 +15,7 @@ install_dir/
 *.o
 *.obj
 
-# Precompiled Headers
+# Precompiled headers
 *.gch
 *.pch
 

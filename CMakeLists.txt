@@ -51,6 +51,17 @@ include(cmake/CopyHelper.cmake)
 add_executable(${MAIN_EXECUTABLE_NAME}
     main.cpp
     generated/src/Helper.cpp
+        sources/ReteaMetrou.cpp
+        sources/Statia.cpp
+        sources/Traseu.cpp
+        sources/Tren.cpp
+        sources/TrenElectric.cpp
+        sources/TrenNoapte.cpp
+        sources/TrenRapid.cpp
+
+
+
+
 )
 
 # NOTE: Add all defined targets (e.g. executables, libraries, etc. )
@@ -81,3 +92,4 @@ endif()
 copy_files(FILES tastatura.txt COPY_TO_DESTINATION TARGET_NAME ${MAIN_EXECUTABLE_NAME})
 # copy_files(FILES tastatura.txt config.json DIRECTORY images sounds COPY_TO_DESTINATION TARGET_NAME ${MAIN_EXECUTABLE_NAME})
 # copy_files(DIRECTORY images sounds COPY_TO_DESTINATION TARGET_NAME ${MAIN_EXECUTABLE_NAME})
+
