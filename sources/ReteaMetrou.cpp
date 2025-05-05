@@ -4,6 +4,37 @@
 #include "../headers/TrenElectric.h"
 
 #include <algorithm>
+
+class TrenIstoric : public Tren {
+private:
+    int oraStart;
+    int oraStop;
+
+public:
+    TrenIstoric(const std::string& id, int viteza, int oraStart, int oraStop)
+        : Tren(id, viteza), oraStart(oraStart), oraStop(oraStop) {}
+
+    void afisare() const override {
+        Tren::afisare();
+        std::cout << " | Circula intre: " << oraStart << ":00 - " << oraStop << ":00";
+    }
+
+    double calculeazaTimpParcurgere(double distanta) const override {
+        // Viteza unui tren istoric poate fi mai mica
+        double timpOre = distanta / (viteza * 0.2);
+        return timpOre * 60.0;
+    }
+
+    double calculeazaEficienta() const override {
+        // Trenurile istorice pot fi considerate mai putin eficiente din punct de vedere al consumului
+        return Tren::calculeazaEficienta() * 0.8;
+    }
+
+    // Getter specific
+    int getOraStart() const { return oraStart; }
+    int getOraStop() const{ return oraStop; }
+};
+
 ReteaMetrou::ReteaMetrou(const std::string& numeRetea)
     : numeRetea(numeRetea) {}
 void ReteaMetrou::adaugaTraseu(std::shared_ptr<Traseu> traseu) {
@@ -47,7 +78,10 @@ std::shared_ptr<Tren> ReteaMetrou::obtineTrenDisponibil(int ora) const {
         return std::make_shared<TrenRapid>("Tren-Rapid", 80, 25, true); // 05:00-13:00
     }
     else if (ora >= 13 && ora < 23) {
-        return std::make_shared<TrenElectric>("Tren-Electric", 75, 90, 480, true); // 13:00-23:00
+            if (17 <= ora && ora <= 19)
+                return std::make_shared<TrenIstoric>("TREN007", 40, 17, 19);
+            else
+                return std::make_shared<TrenElectric>("Tren-Electric", 75, 90, 480, true); // 13:00-23:00
     }
     else {
         return std::make_shared<TrenNoapte>("Tren-Noapte", 70, 23, 5, 0.8); // 23:00-05:00
@@ -207,7 +241,7 @@ std::string ReteaMetrou::statiaAglomerata() const {
 void ReteaMetrou::afisareStatisticiTrenuri() const {
     std::cout << "\nStatistici trenuri din reteaua " << numeRetea << ":\n";
 
-        int nrTrenRapid = 0, nrTrenNoapte = 0, nrTrenElectric = 0;
+        int nrTrenRapid = 0, nrTrenNoapte = 0, nrTrenElectric = 0, nrTrenIstoric = 0;
         double eficientaMedieTrenuri = 0.0;
 
         for (const auto& traseu : trasee) {
@@ -226,6 +260,9 @@ void ReteaMetrou::afisareStatisticiTrenuri() const {
             else if (dynamic_cast<TrenElectric*>(tren.get())) {
                 nrTrenElectric++;
             }
+            else if (dynamic_cast<TrenIstoric*>(tren.get())) {
+                nrTrenIstoric++;
+            }
         }
 
         if (!trasee.empty()) {
@@ -236,6 +273,8 @@ void ReteaMetrou::afisareStatisticiTrenuri() const {
         std::cout << "- Trenuri Rapide: " << nrTrenRapid << "\n";
         std::cout << "- Trenuri de Noapte: " << nrTrenNoapte << "\n";
         std::cout << "- Trenuri Electrice: " << nrTrenElectric << "\n";
+        std::cout << "- Trenuri Istorice: " << nrTrenIstoric << "\n";
+
         std::cout << "Eficienta medie a trenurilor: " << eficientaMedieTrenuri << "\n";
 
         // Afișăm detalii specifice pentru fiecare tip de tren
@@ -256,9 +295,13 @@ void ReteaMetrou::afisareStatisticiTrenuri() const {
             }
             else if (const TrenNoapte* trenNoapte = dynamic_cast<const TrenNoapte*>(tren.get())) {
                 std::cout << "  - Tip: Nocturn\n";
-                std::cout << "  - Program: " << trenNoapte->getOraStart() << ":00 - "
-                     << trenNoapte->getOraStop() << ":00\n";
+                std::cout << "  - Program: " << trenNoapte->getOraStart() << ":00 - " << trenNoapte->getOraStop() << ":00\n";
                 std::cout << "  - Factor viteza: " << trenNoapte->getFactorViteza() << "\n";
+            }
+            else if (const TrenIstoric* trenIstoric = dynamic_cast<const TrenIstoric*>(tren.get())) {
+                std::cout << "  - Tip: Istoric\n";
+                std::cout << " - Program: "<<trenIstoric->getOraStart() << ":00 - " << trenIstoric->getOraStop() << ":00\n";
+                std::cout << " - Eficienta: " << trenIstoric->calculeazaEficienta() << "\n";
             }
             else {
                 std::cout << "  - Tip: Necunoscut\n";

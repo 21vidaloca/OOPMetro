@@ -20,6 +20,7 @@ using namespace std;
 
 
 
+
 int main() {
     try {
         // Creare retea de metrou
@@ -29,11 +30,13 @@ int main() {
         auto tren1 = make_shared<TrenRapid>("M1-R", 80, 25, true);
         auto tren2 = make_shared<TrenNoapte>("M2-N", 70, 23, 5, 0.8);
         auto tren3 = make_shared<TrenElectric>("M3-E", 75, 90, 480, true);
+        //auto tren4 = std::make_shared<TrenIstoric>("TREN007", 40, 17, 19);
+
 
         // Creare trasee folosind smart pointers
         auto traseul1 = make_shared<Traseu>("Magistrala 1: Pantelimon - Gara de Nord", tren1);
         auto traseul2 = make_shared<Traseu>("Magistrala 2: Pipera - Berceni", tren2);
-        auto traseul3 = make_shared<Traseu>("Magistrala 3: Preciziei - Anghel Saligny", tren3);
+        auto traseul3 = std::make_shared<Traseu>("Magistrala 3: Preciziei - Anghel Saligny", tren3);
 
         // Creare statii folosind smart pointers
         traseul1->adaugaStatia(make_shared<Statia>("Pantelimon", 20, 3));
@@ -90,7 +93,7 @@ int main() {
         cout << "- Trenurile de Noapte circula intre orele 23:00 - 05:00\n\n";
 
         // Testarea disponibilității trenurilor în funcție de oră
-        vector<int> oreTest = {3, 8, 15, 23};
+        vector<int> oreTest = {3, 8, 18, 23};
 
         cout << "Tipul de tren disponibil la diferite ore:\n";
         for (int ora : oreTest) {
