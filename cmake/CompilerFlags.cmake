@@ -21,7 +21,7 @@ function(set_compiler_flags)
         ###############################################################################
 
         if(PROJECT_WARNINGS_AS_ERRORS)
-            set_property(TARGET ${TARGET_NAME} PROPERTY COMPILE_WARNING_AS_ERROR OFF)
+            set_property(TARGET ${TARGET_NAME} PROPERTY COMPILE_WARNING_AS_ERROR ON)
         endif()
 
         # custom compiler flags
