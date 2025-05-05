@@ -543,9 +543,9 @@ public:
             }
         }
 
-        // Dacă graful este gol, înseamnă că nu există trenuri disponibile la ora specificată
+        // Dacă graful este gol, inseamna ca nu exista trenuri disponibile la ora specificata
         if (graf.empty()) {
-            cout << "Eroare: Nu există trenuri disponibile la ora " << ora << endl;
+            cout << "Eroare: Nu exista trenuri disponibile la ora " << ora << endl;
             return false;
         }
 
@@ -653,10 +653,10 @@ public:
         for (const auto& traseu : trasee) {
             auto tren = traseu->getTren();
 
-            // Adăugăm la eficiența medie
+
             eficientaMedieTrenuri += tren->calculeazaEficienta();
 
-            // Numărăm tipul de trenuri
+
             if (dynamic_cast<TrenRapid*>(tren.get())) {
                 nrTrenRapid++;
             }
@@ -678,7 +678,7 @@ public:
         cout << "- Trenuri Electrice: " << nrTrenElectric << "\n";
         cout << "Eficienta medie a trenurilor: " << eficientaMedieTrenuri << "\n";
 
-        // Afișăm detalii specifice pentru fiecare tip de tren
+
         for (const auto& traseu : trasee) {
             auto tren = traseu->getTren();
             cout << "\nTrenul de pe traseul " << traseu->getNumeRuta() << ":\n";
