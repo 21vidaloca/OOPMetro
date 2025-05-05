@@ -3,17 +3,25 @@
 #include "../headers/TrenNoapte.h"
 #include "../headers/TrenElectric.h"
 
-#include<algorithm>
+#include <algorithm>
 ReteaMetrou::ReteaMetrou(const std::string& numeRetea)
     : numeRetea(numeRetea) {}
-
 void ReteaMetrou::adaugaTraseu(std::shared_ptr<Traseu> traseu) {
-    trasee.push_back(traseu);
-    // Update the station map
-    for (const auto& statie : traseu->getStatii()) {
-        statii[statie->getNume()] = statie;
+    if (trasee.size() >= MAX_TRASEE) {
+        throw TraseuLimitExceededException();
     }
+    trasee.push_back(traseu);
 }
+
+void ReteaMetrou::adaugaTraseu(std::string numeTraseu, std::shared_ptr<Tren> tren) {
+    if (trasee.size() >= MAX_TRASEE) {
+        throw TraseuLimitExceededException();
+    }
+    trasee.push_back(make_shared<Traseu>(numeTraseu, tren));
+}
+
+
+
 
 void ReteaMetrou::afisareTrasee() const {
     std::cout << "RETEAUA DE METROU: " << numeRetea << "\n";

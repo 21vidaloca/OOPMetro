@@ -11,11 +11,42 @@
 
 #include "../headers/Traseu.h"
 
+// Clasa de bază pentru excepții personalizate
+class ReteaMetrouException : public std::exception {
+public:
+    explicit ReteaMetrouException(const char* message) : message_(message) {}
+    virtual const char* what() const noexcept override { return message_; }
+
+protected:
+    const char* message_;
+};
+
+// Excepție pentru cazul în care se încearcă adăugarea unui număr prea mare de trasee
+class TraseuLimitExceededException : public ReteaMetrouException {
+public:
+    TraseuLimitExceededException() : ReteaMetrouException("Eroare: Numarul maxim de trasee a fost atins.") {}
+};
+
+// Excepție pentru cazul în care o stație nu este găsită în rețea
+class StatieNotFoundException : public ReteaMetrouException {
+public:
+    StatieNotFoundException(const std::string& numeStatie)
+        : ReteaMetrouException(("Eroare: Statia " + numeStatie + " nu exista in retea.").c_str()) {}
+};
+
+// Excepție pentru cazul în care nu se poate calcula o rută între două stații
+class RutaNotFoundException : public ReteaMetrouException {
+public:
+    RutaNotFoundException(const std::string& start, const std::string& destinatie, int ora)
+        : ReteaMetrouException(("Eroare: Nu s-a putut calcula o ruta intre " + start + " si " + destinatie + " la ora " + std::to_string(ora) + ".").c_str()) {}
+};
+
 class ReteaMetrou {
 private:
     std::string numeRetea;
     std::vector<std::shared_ptr<Traseu>> trasee;
     std::unordered_map<std::string, std::shared_ptr<Statia>> statii;
+    static const int MAX_TRASEE = 10;
 
     struct Nod {
         std::string numeStatie;
@@ -34,6 +65,7 @@ public:
     ReteaMetrou(const std::string& numeRetea);
 
     void adaugaTraseu(std::shared_ptr<Traseu> traseu);
+    void adaugaTraseu(std::string numeTraseu, std::shared_ptr<Tren> tren);
 
     void afisareTrasee() const;
 
