@@ -136,10 +136,10 @@ int main() {
                     }
                     cout << "\nTimp total estimat: " << timpTotal << " minute\n";
                 }
-                double timpCalatorie;
+                /*double timpCalatorie;
                 vector<string> ruta;
                 // Test RutaNotFoundException
-                /*cout << "\nTest RutaNotFoundException\n";
+                cout << "\nTest RutaNotFoundException\n";
                 try {
                     retea.calculeazaRutaOptima("Gara de Nord", "Berceni", timpCalatorie, ruta, 10);
                 } catch (const RutaNotFoundException& e) {
