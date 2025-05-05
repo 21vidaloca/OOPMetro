@@ -33,6 +33,7 @@ int main() {
         //auto tren4 = std::make_shared<TrenIstoric>("TREN007", 40, 17, 19);
 
 
+
         // Creare trasee folosind smart pointers
         auto traseul1 = make_shared<Traseu>("Magistrala 1: Pantelimon - Gara de Nord", tren1);
         auto traseul2 = make_shared<Traseu>("Magistrala 2: Pipera - Berceni", tren2);
