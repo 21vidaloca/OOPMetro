@@ -3,6 +3,9 @@
 
 #include <iostream>
 #include <string>
+#include <vector>
+#include <memory>
+
 
 class Tren {
 protected:

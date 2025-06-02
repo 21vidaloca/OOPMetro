@@ -15,6 +15,8 @@
 #include "headers/TrenElectric.h"
 #include "headers/Traseu.h"
 #include "headers/ReteaMetrou.h"
+#include "headers/TrenFactory.h"
+#include "headers/TraseuBuilder.h"
 
 using namespace std;
 
@@ -32,6 +34,38 @@ int main() {
         auto tren3 = make_shared<TrenElectric>("M3-E", 75, 90, 480, true);
         //auto tren4 = std::make_shared<TrenIstoric>("TREN007", 40, 17, 19);
 
+        cout << "\n--- DEMONSTRATIE PATTERN BUILDER PENTRU TRASEU ---\n";
+        TraseuBuilder traseuBuilder;
+
+        // Construirea Traseului 1 folosind Builder
+        auto traseul1_builder = traseuBuilder
+                                    .setName("Magistrala 1 (Builder): Dristor 2 - Pantelimon")
+                                    .assignTrain(tren1)
+                                    .addStatiaDetails("Dristor 2", 30, 3)
+                                    .addStatia(make_shared<Statia>("Piata Muncii", 25, 2))
+                                    .addStatiaDetails("Iancului", 20, 4)
+                                    .addStatiaDetails("Obor", 35, 3)
+                                    .addStatiaDetails("Pantelimon", 25, 0)
+                                    .build();
+
+        cout << "Traseul 1 construit cu Builder:\n";
+        traseul1_builder->afisare(); // Afișăm traseul construit
+        cout << "---------------------------------------------------\n";
+
+        // Resetăm builder-ul pentru a construi Traseul 2
+        traseuBuilder.reset();
+        auto traseul2_builder = traseuBuilder
+                                    .setName("Magistrala 2 (Builder): Pipera - Tudor Arghezi")
+                                    .assignTrain(tren2)
+                                    .addStatiaDetails("Pipera", 30, 2)
+                                    .addStatiaDetails("Aurel Vlaicu", 20, 2)
+                                    .addStatiaDetails("Piata Victoriei", 40, 1)
+                                    .addStatiaDetails("Tudor Arghezi", 25, 0)
+                                    .build();
+
+        cout << "Traseul 2 construit cu Builder:\n";
+        traseul2_builder->afisare();
+        cout << "---------------------------------------------------\n";
 
 
         // Creare trasee folosind smart pointers
@@ -65,7 +99,7 @@ int main() {
         traseul3->adaugaStatia(make_shared<Statia>("Dristor", 35, 4));
         traseul3->adaugaStatia(make_shared<Statia>("Anghel Saligny", 20, 0));
 
-        retea.adaugaTraseu(traseul1);
+        retea.adaugaTraseu(traseul1_builder);
         retea.adaugaTraseu(traseul2);
         retea.adaugaTraseu(traseul3);
 
@@ -140,7 +174,7 @@ int main() {
                     }
                     cout << "\nTimp total estimat: " << timpTotal << " minute\n";
                 }
-                /*double timpCalatorie;
+                double timpCalatorie;
                 vector<string> ruta;
                 // Test RutaNotFoundException
                 cout << "\nTest RutaNotFoundException\n";
@@ -158,7 +192,7 @@ int main() {
                     }
                 } catch (const TraseuLimitExceededException& e) {
                     cerr << "Exceptie prinsa: " << e.what() << endl;
-                }*/
+                }
 
             }
         }

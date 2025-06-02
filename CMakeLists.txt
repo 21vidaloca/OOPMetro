@@ -58,6 +58,8 @@ add_executable(${MAIN_EXECUTABLE_NAME}
         sources/TrenElectric.cpp
         sources/TrenNoapte.cpp
         sources/TrenRapid.cpp
+        sources/TrenFactory.cpp
+        sources/TraseuBuilder.cpp
 
 
 

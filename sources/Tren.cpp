@@ -1,4 +1,10 @@
 #include "../headers/Tren.h"
+#include "../headers/TrenRapid.h"
+#include "../headers/TrenNoapte.h"
+#include "../headers/TrenElectric.h"
+#include <memory>
+#include <vector>
+
 
 Tren::Tren(const std::string& id, int viteza)
     : id(id), viteza(viteza) {}

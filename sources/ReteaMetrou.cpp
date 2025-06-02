@@ -2,6 +2,7 @@
 #include "../headers/TrenRapid.h"
 #include "../headers/TrenNoapte.h"
 #include "../headers/TrenElectric.h"
+#include "../headers/TrenFactory.h"
 
 #include <algorithm>
 
@@ -73,19 +74,7 @@ bool ReteaMetrou::existaStatieInRetea(const std::string& numeStatie) const {
     return false;
 }
 std::shared_ptr<Tren> ReteaMetrou::obtineTrenDisponibil(int ora) const {
-    // Selectăm tipul de tren în funcție de ora din zi
-    if (ora >= 5 && ora < 13) {
-        return std::make_shared<TrenRapid>("Tren-Rapid", 80, 25, true); // 05:00-13:00
-    }
-    else if (ora >= 13 && ora < 23) {
-            if (17 <= ora && ora <= 19)
-                return std::make_shared<TrenIstoric>("TREN007", 40, 17, 19);
-            else
-                return std::make_shared<TrenElectric>("Tren-Electric", 75, 90, 480, true); // 13:00-23:00
-    }
-    else {
-        return std::make_shared<TrenNoapte>("Tren-Noapte", 70, 23, 5, 0.8); // 23:00-05:00
-    }
+    return TrainFactory::createTrain(ora);
 }
 
 bool ReteaMetrou::calculeazaRutaOptima(const std::string& start, const std::string& destinatie,
