@@ -35,6 +35,7 @@ public:
 
     // Getteri
     int getViteza() const;
+    const std::string& getNume() const;
 
     // Operator pentru afisare
     friend std::ostream& operator<<(std::ostream& os, const Tren& tren);

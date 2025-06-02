@@ -38,6 +38,9 @@ double Tren::calculeazaEficienta() const {
 }
 
 int Tren::getViteza() const { return viteza; }
+const std::string& Tren::getNume() const {
+    return id;
+}
 
 std::ostream& operator<<(std::ostream& os, const Tren& tren) {
     tren.afisare();

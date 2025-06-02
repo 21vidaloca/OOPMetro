@@ -8,6 +8,7 @@
 #include <memory>
 #include <ctime>
 
+
 #include "headers/Statia.h"
 #include "headers/Tren.h"
 #include "headers/TrenRapid.h"
@@ -20,7 +21,55 @@
 
 using namespace std;
 
+template <typename T>
+class CatalogEntitati {
+private:
+    std::vector<std::shared_ptr<T>> entitati;
+    std::string numeCatalog;
 
+public:
+    CatalogEntitati(const std::string& nume = "Catalog Generic") : numeCatalog(nume) {}
+
+    void adaugaEntitate(std::shared_ptr<T> entitate) {
+        if (entitate) {
+            entitati.push_back(entitate);
+        }
+    }
+
+    // Presupunem că tipul T are o metodă publică:
+    // const std::string& getNume() const; (sau un echivalent pentru identificare)
+    std::shared_ptr<T> gasesteDupaNume(const std::string& numeDeCautat) const {
+        auto it = std::find_if(entitati.begin(), entitati.end(),
+                               [&numeDeCautat](const std::shared_ptr<T>& entitatePtr) {
+                                   // Verifică dacă pointerul nu e null și apelează getNume()
+                                   return entitatePtr && entitatePtr->getNume() == numeDeCautat;
+                               });
+        if (it != entitati.end()) {
+            return *it; // Returnează shared_ptr-ul către entitatea găsită
+        }
+        return nullptr; // Nu s-a găsit
+    }
+
+    void afiseazaToateEntitatile() const {
+        std::cout << "--- " << numeCatalog << " ---" << std::endl;
+        if (entitati.empty()) {
+            std::cout << "Catalogul este gol." << std::endl;
+            return;
+        }
+        int index = 1;
+        for (const auto& entitatePtr : entitati) {
+            if (entitatePtr) {
+                // Presupunem că tipul T are operator<< supraîncărcat pentru afișare
+                std::cout << index++ << ". " << *entitatePtr << std::endl;
+            }
+        }
+        std::cout << "-----------------------------" << std::endl;
+    }
+
+    const std::vector<std::shared_ptr<T>>& getAll() const {
+        return entitati;
+    }
+};
 
 
 int main() {
@@ -198,11 +247,80 @@ int main() {
         }
         cout << "Afisare Finala: \n";
         retea.afisareStatisticiTrenuri();
+
+        cout << "\n--- DEMONSTRATIE CLASA SABLON: CatalogEntitati ---" << std::endl;
+
+
+        CatalogEntitati<Statia> catalogStatii("Catalog Statii Metrou");
+
+
+        auto statieDemo1 = std::make_shared<Statia>("Piata Unirii 1", 45, 3);
+        auto statieDemo2 = std::make_shared<Statia>("Piata Victoriei", 40, 2);
+        auto statieDemo3 = std::make_shared<Statia>("Eroilor", 35, 2);
+
+        catalogStatii.adaugaEntitate(statieDemo1);
+        catalogStatii.adaugaEntitate(traseul1->getStatii()[0]);
+        catalogStatii.adaugaEntitate(statieDemo2);
+        catalogStatii.adaugaEntitate(statieDemo3);
+
+        catalogStatii.afiseazaToateEntitatile();
+
+        std::cout << "Cautare statie 'Piata Victoriei' in catalogStatii..." << std::endl;
+        std::shared_ptr<Statia> statieGasita = catalogStatii.gasesteDupaNume("Piata Victoriei");
+        if (statieGasita) {
+            std::cout << "Gasit: " << *statieGasita << std::endl;
+        } else {
+            std::cout << "Statia 'Piata Victoriei' nu a fost gasita." << std::endl;
+        }
+
+        std::cout << "Cautare statie 'Grozavesti' (inexistenta) in catalogStatii..." << std::endl;
+        statieGasita = catalogStatii.gasesteDupaNume("Grozavesti");
+        if (statieGasita) {
+            std::cout << "Gasit: " << *statieGasita << std::endl;
+        } else {
+            std::cout << "Statia 'Grozavesti' nu a fost gasita." << std::endl;
+        }
+
+        CatalogEntitati<Tren> catalogTrenuri("Catalog Trenuri Parc");
+
+        catalogTrenuri.adaugaEntitate(tren1);
+        catalogTrenuri.adaugaEntitate(tren2);
+        catalogTrenuri.adaugaEntitate(tren3);
+
+
+        auto trenDemoElectric = std::make_shared<TrenElectric>("T-Electric-004", 70, 88.0, 420, false);
+        catalogTrenuri.adaugaEntitate(trenDemoElectric);
+
+        catalogTrenuri.afiseazaToateEntitatile();
+
+        std::cout << "Cautare tren 'M2-N' in catalogTrenuri..." << std::endl;
+        std::shared_ptr<Tren> trenGasit = catalogTrenuri.gasesteDupaNume("M2-N");
+        if (trenGasit) {
+            std::cout << "Gasit: ";
+            trenGasit->afisare();
+            std::cout << std::endl;
+        } else {
+            std::cout << "Trenul 'M2-N' nu a fost gasit." << std::endl;
+        }
+
+        std::cout << "Cautare tren 'X99-Z' (inexistent) in catalogTrenuri..." << std::endl;
+        trenGasit = catalogTrenuri.gasesteDupaNume("X99-Z");
+        if (trenGasit) {
+            std::cout << "Gasit: " << *trenGasit << std::endl;
+        } else {
+            std::cout << "Trenul 'X99-Z' nu a fost gasit." << std::endl;
+        }
+        std::cout << "----------------------------------------------------" << std::endl;
+
     }
     catch (const ReteaMetrouException& e) {
         cerr << "Exceptie generala prinsa: " << e.what() << endl;
         return 1;
     }
     cout << "Program terminat cu succes!\n";
+
+
+
+
     return 0;
 }
